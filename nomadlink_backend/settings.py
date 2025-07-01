@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'schema_viewer',
     'kyc',
+    'drf_spectacular',
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -168,6 +169,7 @@ REST_FRAMEWORK = {
     # Authentication: Use SimpleJWT
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
     ),
 
     # Permissions: Require login by default
@@ -178,8 +180,36 @@ REST_FRAMEWORK = {
     # Pagination: Use PageNumberPagination
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,  
+    
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',   
 
 }
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'XcelTrip API',
+    'DESCRIPTION': (
+        'Backend API for the XcelTrip Hackathon Project\n\n'
+        '**Backend Developer:** Asile Ayuba    \n' 
+        '**Email:** asileayuba@gmail.com  \n'
+        '**GitHub:** [github.com/asileayuba](https://github.com/asileayuba)  \n'
+        '**License:** MIT License'            
+    ),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'EXTENSIONS_INFO': {
+        'x-developer': 'Asile Ayuba',
+        'x-contact-email': 'asileayuba@gmail.com',
+        'x-github': 'https://github.com/asileayuba',
+        'x-license': 'MIT',
+    },
+    'CONTACT': {
+        'name': 'Asile Ayuba',
+        'email': 'asileayuba@gmail.com',
+        # 'url': 'https://github.com/asileayuba',
+    },
+}
+
 
 
 SIMPLE_JWT = {
@@ -189,7 +219,7 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    # "http://localhost:3000",  # Your frontend URL
+    # "http://localhost:3000",  # Frontend URL
 ]
 
 CORS_ALLOW_CREDENTIALS = True

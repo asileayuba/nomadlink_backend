@@ -1,0 +1,722 @@
+openapi: 3.0.3
+info:
+  title: XcelTrip API
+  version: 1.0.0
+  x-developer: Asile Ayuba
+  x-contact-email: asileayuba@gmail.com
+  x-github: https://github.com/asileayuba
+  x-license: MIT
+  description: "Backend API for the XcelTrip Hackathon Project\n\n**Backend Developer:**\
+    \ Asile Ayuba    \n**Email:** asileayuba@gmail.com  \n**GitHub:** [github.com/asileayuba](https://github.com/asileayuba)\
+    \  \n**License:** MIT License"
+  contact:
+    name: Asile Ayuba
+    email: asileayuba@gmail.com
+paths:
+  /api/auth/login/:
+    post:
+      operationId: auth_login_create
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: Successful login
+  /api/auth/nonce/:
+    get:
+      operationId: auth_nonce_retrieve
+      description: Generates a nonce that the frontend must sign to login with wallet
+      parameters:
+      - in: query
+        name: wallet
+        schema:
+          type: string
+        description: Wallet address to generate a unique nonce for
+        required: true
+      tags:
+      - Authentication
+      security:
+      - jwtAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: Returns nonce for signing
+  /api/auth/profile/:
+    get:
+      operationId: auth_profile_retrieve
+      description: Returns authenticated user's wallet, KYC status, and bookings
+      tags:
+      - User
+      security:
+      - jwtAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: Authenticated user's profile info
+  /api/auth/register/:
+    post:
+      operationId: auth_register_create
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          description: Successfully registered
+  /api/auth/wallet-signin/:
+    post:
+      operationId: auth_wallet_signin_create
+      description: Authenticates a user using MetaMask/Web3 signature + nonce.
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: {}
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: {}
+          multipart/form-data:
+            schema:
+              type: object
+              additionalProperties: {}
+      security:
+      - jwtAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: Login with signed wallet message
+  /api/bookings/:
+    get:
+      operationId: bookings_list
+      description: Authenticated user can view or create bookings. Only their own
+        bookings are returned.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - Booking
+      security:
+      - jwtAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookingList'
+              examples:
+                BookingResponseExample:
+                  value:
+                    count: 123
+                    next: http://api.example.org/accounts/?page=4
+                    previous: http://api.example.org/accounts/?page=2
+                    results:
+                    - id: 1
+                      user: 3
+                      destination: Nairobi
+                      start_date: '2025-07-10'
+                      end_date: '2025-07-15'
+                      status: pending
+                      created_at: '2025-06-30T15:00:00Z'
+          description: Returns list of user's bookings or newly created booking
+    post:
+      operationId: bookings_create
+      description: Create a new booking for the authenticated user.
+      tags:
+      - Booking
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/bookings/mint/:
+    post:
+      operationId: bookings_mint_create
+      description: Endpoint to trigger TrailProof SBT minting after a successful booking
+        (placeholder for smart contract integration)
+      tags:
+      - Booking
+      security:
+      - jwtAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: Minting response
+  /api/kyc/:
+    get:
+      operationId: kyc_retrieve
+      description: Authenticated users can retrieve or update their KYC Level 1 and
+        Level 2 info
+      tags:
+      - KYC
+      security:
+      - jwtAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KYC'
+              examples:
+                KYCResponseExample:
+                  value:
+                    id: 5
+                    user: 12
+                    full_name: Asile Ayuba
+                    date_of_birth: '2000-06-28'
+                    id_type: passport
+                    id_document: http://example.com/media/kyc/documents/id.pdf
+                    id_document_file_type: .pdf
+                    id_document_file_size: 102394
+                    selfie_photo: http://example.com/media/kyc/selfies/selfie.png
+                    selfie_file_type: .png
+                    selfie_file_size: 204801
+                    level: level_2
+                    review_status: pending
+                    is_verified: false
+                    submitted_at: '2025-06-30T18:30:00Z'
+                    reviewed_at: null
+                  summary: KYC Response Example
+          description: ''
+    put:
+      operationId: kyc_update
+      description: Authenticated users can retrieve or update their KYC Level 1 and
+        Level 2 info
+      tags:
+      - KYC
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KYCRequest'
+            examples:
+              KYCSubmissionExample:
+                value:
+                  full_name: Asile Ayuba
+                  date_of_birth: '2000-06-28'
+                  id_type: passport
+                  id_document: null
+                  selfie_photo: null
+                summary: KYC Submission Example
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/KYCRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/KYCRequest'
+      security:
+      - jwtAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KYC'
+              examples:
+                KYCResponseExample:
+                  value:
+                    id: 5
+                    user: 12
+                    full_name: Asile Ayuba
+                    date_of_birth: '2000-06-28'
+                    id_type: passport
+                    id_document: http://example.com/media/kyc/documents/id.pdf
+                    id_document_file_type: .pdf
+                    id_document_file_size: 102394
+                    selfie_photo: http://example.com/media/kyc/selfies/selfie.png
+                    selfie_file_type: .png
+                    selfie_file_size: 204801
+                    level: level_2
+                    review_status: pending
+                    is_verified: false
+                    submitted_at: '2025-06-30T18:30:00Z'
+                    reviewed_at: null
+                  summary: KYC Response Example
+          description: ''
+    patch:
+      operationId: kyc_partial_update
+      tags:
+      - kyc
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedKYCRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedKYCRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedKYCRequest'
+      security:
+      - jwtAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KYC'
+          description: ''
+  /api/kyc/status/:
+    get:
+      operationId: kyc_status_retrieve
+      description: Returns the current user's KYC level, review status, and verification
+        flag
+      tags:
+      - KYC
+      security:
+      - jwtAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+              examples:
+                KYCStatusResponse:
+                  value:
+                    kyc_level: level_2
+                    review_status: approved
+                    is_verified: true
+                  summary: KYC Status Response
+                UnsubmittedUserResponse:
+                  value:
+                    kyc_level: null
+                    review_status: not_submitted
+                    is_verified: false
+                  summary: Unsubmitted User Response
+          description: ''
+  /api/kyc/verify/{user_id}/:
+    patch:
+      operationId: kyc_verify_partial_update
+      description: Admin endpoint to verify or reject a user's KYC submission by user
+        ID
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        description: ID of the user whose KYC you want to verify
+        required: true
+      tags:
+      - KYC
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: {}
+            examples:
+              ApproveKYCExample:
+                value:
+                  review_status: approved
+                summary: Approve KYC Example
+              RejectKYCExample:
+                value:
+                  review_status: rejected
+                summary: Reject KYC Example
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: {}
+          multipart/form-data:
+            schema:
+              type: object
+              additionalProperties: {}
+      security:
+      - jwtAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+              examples:
+                SuccessResponse:
+                  value:
+                    message: KYC reviewed
+                    user: '0x45517BeeFE934Ca1041F9E05f799184a32A29a7a'
+                    review_status: approved
+                    verified: true
+                  summary: Success Response
+          description: ''
+components:
+  schemas:
+    Booking:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        destination:
+          type: string
+          maxLength: 255
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+      required:
+      - created_at
+      - destination
+      - end_date
+      - id
+      - start_date
+      - user
+    BookingRequest:
+      type: object
+      properties:
+        destination:
+          type: string
+          minLength: 1
+          maxLength: 255
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+      required:
+      - destination
+      - end_date
+      - start_date
+    IdTypeEnum:
+      enum:
+      - passport
+      - national_id
+      - driver_license
+      - other
+      type: string
+      description: |-
+        * `passport` - Passport
+        * `national_id` - National ID
+        * `driver_license` - Driver’s License
+        * `other` - Other
+    KYC:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        full_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+        id_type:
+          $ref: '#/components/schemas/IdTypeEnum'
+        id_document:
+          type: string
+          format: uri
+          nullable: true
+        id_document_file_type:
+          type: string
+          nullable: true
+          maxLength: 50
+        id_document_file_size:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        selfie_photo:
+          type: string
+          format: uri
+          nullable: true
+        selfie_file_type:
+          type: string
+          nullable: true
+          maxLength: 50
+        selfie_file_size:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        level:
+          allOf:
+          - $ref: '#/components/schemas/LevelEnum'
+          readOnly: true
+        review_status:
+          allOf:
+          - $ref: '#/components/schemas/ReviewStatusEnum'
+          readOnly: true
+        is_verified:
+          type: boolean
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+        reviewed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        user:
+          type: integer
+          readOnly: true
+      required:
+      - id
+      - is_verified
+      - level
+      - review_status
+      - reviewed_at
+      - submitted_at
+      - user
+    KYCRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+        id_type:
+          $ref: '#/components/schemas/IdTypeEnum'
+        id_document:
+          type: string
+          format: binary
+          nullable: true
+        id_document_file_type:
+          type: string
+          nullable: true
+          maxLength: 50
+        id_document_file_size:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        selfie_photo:
+          type: string
+          format: binary
+          nullable: true
+        selfie_file_type:
+          type: string
+          nullable: true
+          maxLength: 50
+        selfie_file_size:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+    LevelEnum:
+      enum:
+      - level_1
+      - level_2
+      type: string
+      description: |-
+        * `level_1` - Level 1
+        * `level_2` - Level 2
+    LoginRequest:
+      type: object
+      properties:
+        wallet_address:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - wallet_address
+    PaginatedBookingList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Booking'
+    PatchedKYCRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+        id_type:
+          $ref: '#/components/schemas/IdTypeEnum'
+        id_document:
+          type: string
+          format: binary
+          nullable: true
+        id_document_file_type:
+          type: string
+          nullable: true
+          maxLength: 50
+        id_document_file_size:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        selfie_photo:
+          type: string
+          format: binary
+          nullable: true
+        selfie_file_type:
+          type: string
+          nullable: true
+          maxLength: 50
+        selfie_file_size:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+    RegisterRequest:
+      type: object
+      properties:
+        wallet_address:
+          type: string
+          minLength: 1
+          maxLength: 255
+        username:
+          type: string
+          minLength: 1
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          minLength: 8
+      required:
+      - password
+      - username
+      - wallet_address
+    ReviewStatusEnum:
+      enum:
+      - pending
+      - approved
+      - rejected
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `approved` - Approved
+        * `rejected` - Rejected
+    StatusEnum:
+      enum:
+      - pending
+      - confirmed
+      - cancelled
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `confirmed` - Confirmed
+        * `cancelled` - Cancelled
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
