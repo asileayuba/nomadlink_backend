@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: nomadlink-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn nomadlink_backend.wsgi:application
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nomadlink-db
+          property: connectionString
+      - key: MINT_WALLET_PRIVATE_KEY
+        value: your_wallet_private_key
+      - key: MINT_RPC_URL
+        value: https://polygon-amoy.infura.io/v3/YOUR_PROJECT_ID
+      - key: MINT_CONTRACT_ADDRESS
+        value: 0x...
+      - key: MINT_ABI_PATH
+        value: abis/TrailProof.json
+
+databases:
+  - name: nomadlink-db
