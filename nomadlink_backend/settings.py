@@ -13,7 +13,12 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-secret-key")
 DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 DJANGO_ENV = os.getenv('DJANGO_ENV', 'production')
 
-ALLOWED_HOSTS = ['*']  # Or specify your Render domain
+ALLOWED_HOSTS = [
+    'xceltrip-backend.onrender.com',
+    'localhost',
+    '127.0.0.1',
+]
+
 
 # APPS
 INSTALLED_APPS = [
