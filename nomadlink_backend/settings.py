@@ -148,11 +148,12 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'XcelTrip API',
     'DESCRIPTION': (
         'Backend API for the XcelTrip Hackathon Project\n\n'
-        '**Backend Developer:** Asile Ayuba\n'
-        '**Email:** asileayuba@gmail.com\n'
-        '**GitHub:** https://github.com/asileayuba\n'
+        '**Backend Developer:** Asile Ayuba  \n'
+        '**Email:** asileayuba@gmail.com  \n'
+        '**GitHub:** https://github.com/asileayuba  \n'
         '**License:** MIT License'
     ),
+
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,

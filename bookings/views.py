@@ -86,10 +86,38 @@ class BookingViewSet(mixins.CreateModelMixin,
 # ----------------------------
 @extend_schema(
     tags=["Minting"],
-    description="Triggers minting of SoulStamp NFT to authenticated user's wallet address. Requires TrailProof contract and ABI.",
+    description="Authenticated user can mint a SoulStamp NFT to their wallet address. Requires a valid RPC connection, contract ABI, and funded signer.",
+    
+    request=None,
+
     responses={
-        200: OpenApiTypes.OBJECT,
-        500: OpenApiTypes.OBJECT,
+        200: OpenApiResponse(
+            response=OpenApiTypes.OBJECT,
+            description="Returned when the minting transaction is successfully broadcasted.",
+            examples=[
+                OpenApiExample(
+                    name="MintSuccessResponse",
+                    value={
+                        "status": "Mint successful",
+                        "tx_hash": "0xabc123..."
+                    },
+                    response_only=True
+                )
+            ]
+        ),
+        500: OpenApiResponse(
+            response=OpenApiTypes.OBJECT,
+            description="Returned when minting fails due to RPC errors, wallet issues, or contract problems.",
+            examples=[
+                OpenApiExample(
+                    name="MintErrorResponse",
+                    value={
+                        "error": "Minting failed: RPC connection failed"
+                    },
+                    response_only=True
+                )
+            ]
+        )
     }
 )
 @api_view(['POST'])
@@ -117,7 +145,7 @@ def mint_trailproof(request):
         account = w3.eth.account.from_key(private_key)
 
         # 4. Prepare the mint arguments
-        metadata_uri = "https://amber-legal-guppy-153.mypinata.cloud/ipfs/bafkreicro6ti6ipw62bp6hv2tzqqwbcwjgjgk65jl3xijlqaty2naz24gu"  # Replace with real IPFS or booking metadata later
+        metadata_uri = "https://amber-legal-guppy-153.mypinata.cloud/ipfs/bafkreicro6ti6ipw62bp6hv2tzqqwbcwjgjgk65jl3xijlqaty2naz24gu"  # Booking metadata
 
         # 5. Build the transaction
         nonce = w3.eth.get_transaction_count(account.address)
