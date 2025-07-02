@@ -10,6 +10,7 @@ from drf_spectacular.views import (
 from emergency.views import emergency_dashboard
 
 urlpatterns = [
+    path('', include('core.urls')),
     path('admin/emergency-dashboard/', emergency_dashboard, name='emergency-dashboard'),
     path('admin/', admin.site.urls),
 
@@ -29,3 +30,6 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+handler404 = 'core.views.custom_404'
