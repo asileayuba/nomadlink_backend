@@ -1,9 +1,15 @@
 from rest_framework import mixins, viewsets, permissions
-from .models import Booking
-from .serializers import BookingSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.conf import settings
+from web3 import Web3
+import json
+import os
+import traceback
+
+from .models import Booking
+from .serializers import BookingSerializer
 
 # Swagger
 from drf_spectacular.utils import (
@@ -74,32 +80,65 @@ class BookingViewSet(mixins.CreateModelMixin,
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
 
+
 # ----------------------------
-# Mint TrailProof (Post-booking action)
+# Mint TrailProof (SoulStamp NFT)
 # ----------------------------
 @extend_schema(
-    request=None,
+    tags=["Minting"],
+    description="Triggers minting of SoulStamp NFT to authenticated user's wallet address. Requires TrailProof contract and ABI.",
     responses={
-        200: OpenApiResponse(
-            description="Minting response",
-            examples=[
-                OpenApiExample(
-                    name="MintTrailProofResponse",
-                    value={
-                        "message": "Minting request accepted (placeholder)",
-                        "user": "0x123abc456def..."
-                    }
-                )
-            ]
-        )
-    },
-    tags=["Booking"],
-    description="Endpoint to trigger TrailProof SBT minting after a successful booking (placeholder for smart contract integration)"
+        200: OpenApiTypes.OBJECT,
+        500: OpenApiTypes.OBJECT,
+    }
 )
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def mint_trailproof(request):
-    return Response({
-        "message": "Minting request accepted (placeholder)",
-        "user": request.user.wallet_address
-    })
+    user_wallet = Web3.to_checksum_address(request.user.wallet_address)
+
+    try:
+        # 1. Connect to RPC
+        w3 = Web3(Web3.HTTPProvider(settings.MINT_RPC_URL))
+        if not w3.is_connected():
+            return Response({"error": "RPC connection failed"}, status=500)
+
+        # 2. Load and extract ABI from Hardhat artifact
+        with open(settings.MINT_ABI_PATH) as abi_file:
+            artifact = json.load(abi_file)
+            abi = artifact["abi"]
+
+        # 3. Prepare contract and signer
+        contract = w3.eth.contract(
+            address=Web3.to_checksum_address(settings.MINT_CONTRACT_ADDRESS),
+            abi=abi
+        )
+        private_key = settings.MINT_PRIVATE_KEY
+        account = w3.eth.account.from_key(private_key)
+
+        # 4. Prepare the mint arguments
+        metadata_uri = "https://amber-legal-guppy-153.mypinata.cloud/ipfs/bafkreicro6ti6ipw62bp6hv2tzqqwbcwjgjgk65jl3xijlqaty2naz24gu"  # Replace with real IPFS or booking metadata later
+
+        # 5. Build the transaction
+        nonce = w3.eth.get_transaction_count(account.address)
+        txn = contract.functions.mint(user_wallet, metadata_uri).build_transaction({
+            'from': account.address,
+            'nonce': nonce,
+            'gas': 300000,
+            'gasPrice': w3.to_wei('25', 'gwei')
+        })
+
+        # 6. Sign and send
+        # Sign and send transaction
+        signed_txn = w3.eth.account.sign_transaction(txn, private_key)
+        tx_hash = w3.eth.send_raw_transaction(signed_txn.raw_transaction)
+
+
+        return Response({
+            "status": "Mint successful",
+            "tx_hash": tx_hash.hex()
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return Response({"error": f"Minting failed: {str(e)}"}, status=500)

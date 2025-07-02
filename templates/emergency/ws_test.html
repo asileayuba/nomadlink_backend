@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🚨 Emergency WebSocket Monitor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f7f7f7;
+      max-width: 800px;
+      margin: auto;
+    }
+    h2 {
+      color: #e74c3c;
+      font-size: 24px;
+      text-align: center;
+    }
+    select {
+      padding: 8px;
+      margin-top: 10px;
+      width: 100%;
+      font-size: 16px;
+    }
+    .log {
+      margin-top: 20px;
+      max-height: 500px;
+      overflow-y: auto;
+      background: #fff;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    .alert {
+      border-left: 5px solid #e74c3c;
+      margin-bottom: 15px;
+      padding-left: 10px;
+      background: #fff8f8;
+      border-radius: 5px;
+      padding: 10px;
+      font-size: 15px;
+    }
+    .resolved {
+      border-left-color: #2ecc71;
+      background: #f6fff7;
+    }
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      h2 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<h2>🚨 Emergency WebSocket Monitor</h2>
+
+<select id="filter">
+  <option value="all">Show All Alert Types</option>
+  <option value="medical">Medical</option>
+  <option value="threat">Threat</option>
+  <option value="accident">Accident</option>
+  <option value="lost">Lost</option>
+  <option value="other">Other</option>
+</select>
+
+<div class="log" id="log"></div>
+
+<!-- Audio files (Google-hosted) -->
+<audio id="newAlertSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
+<audio id="resolvedSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+
+<script>
+  const log = document.getElementById('log');
+  const filterSelect = document.getElementById('filter');
+  const newAlertSound = document.getElementById('newAlertSound');
+  const resolvedSound = document.getElementById('resolvedSound');
+
+  const allAlerts = []; // Store all alerts
+
+  // Unlock audio on first user click
+  document.addEventListener('click', () => {
+    newAlertSound.play().catch(() => {});
+    resolvedSound.play().catch(() => {});
+  }, { once: true });
+
+  // Connect to WebSocket
+  const ws = new WebSocket('ws://' + window.location.host + '/ws/emergency/');
+
+  ws.onopen = () => {
+    const entry = document.createElement('div');
+    entry.innerHTML = '<strong>✅ Connected to WebSocket</strong>';
+    log.appendChild(entry);
+  };
+
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+
+    if (data.type === 'new_alert') {
+      const a = data.alert;
+      allAlerts.unshift({ type: 'new_alert', alert: a });
+      newAlertSound.play().catch(e => console.warn("Audio error:", e));
+      renderAlerts();
+
+    } else if (data.type === 'alert_resolved') {
+      allAlerts.unshift({ type: 'alert_resolved', alert_id: data.alert_id });
+      resolvedSound.play().catch(e => console.warn("Audio error:", e));
+      renderAlerts();
+    }
+  };
+
+  ws.onerror = (e) => {
+    console.error('WebSocket Error:', e);
+  };
+
+  // Render alerts to DOM
+  function renderAlerts() {
+    const selectedType = filterSelect.value;
+    log.innerHTML = '';
+
+    allAlerts.forEach(data => {
+      const entry = document.createElement('div');
+      entry.classList.add('alert');
+
+      if (data.type === 'new_alert') {
+        const a = data.alert;
+        if (selectedType !== 'all' && a.alert_type?.toLowerCase() !== selectedType.toLowerCase()) return;
+
+        entry.innerHTML = `
+          <strong>🚨 New Emergency</strong><br>
+          <b>User:</b> ${a.user}<br>
+          <b>Type:</b> ${a.alert_type}<br>
+          <b>Message:</b> ${a.message}<br>
+          <b>Location:</b> ${a.latitude}, ${a.longitude}<br>
+          <b>Time:</b> ${a.triggered_at}
+        `;
+      } else if (data.type === 'alert_resolved') {
+        entry.classList.add('resolved');
+        entry.innerHTML = `<strong>✅ Alert Resolved</strong> (ID: ${data.alert_id})`;
+      }
+
+      log.appendChild(entry);
+    });
+  }
+
+  // Re-render when filter changes
+  filterSelect.addEventListener('change', renderAlerts);
+</script>
+
+</body>
+</html>

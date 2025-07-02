@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Thank You for Contacting Me</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+    h2 {
+      color: #0072ef;
+    }
+    p {
+      line-height: 1.6;
+    }
+    .signature {
+      margin-top: 30px;
+      font-style: italic;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 style="color:#2ecc71;">Emergency Alert Resolved</h2>
+    <p>An emergency alert has been resolved by admin.</p>
+    <ul>
+    <li><strong>User:</strong> {{ alert.user.wallet_address }}</li>
+    <li><strong>Message:</strong> {{ alert.message }}</li>
+    <li><strong>Location:</strong> {{ alert.latitude }}, {{ alert.longitude }}</li>
+    <li><strong>Resolved At:</strong> {{ alert.triggered_at }}</li>
+    </ul>
+
+  </div>
+</body>
+</html>

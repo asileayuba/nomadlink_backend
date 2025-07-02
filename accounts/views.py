@@ -279,7 +279,7 @@ def get_wallet_nonce(request):
                 OpenApiExample(
                     "User Profile",
                     value={
-                        "wallet_address": "0x45517BeeFE934Ca1041F9E05f799184a32A29a7a",
+                        "wallet_address": "0x45517meeFE934Ca1041F9E05f799184a87A29a7b",
                         "username": "wallet-45517",
                         "email": "asile@example.com",
                         "kyc": {

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Thank You for Contacting Me</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+    h2 {
+      color: #0072ef;
+    }
+    p {
+      line-height: 1.6;
+    }
+    .signature {
+      margin-top: 30px;
+      font-style: italic;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 style="color:#e74c3c;">Emergency Alert Submitted</h2>
+    <p>Hello {{ user.username }},</p>
+    <p>We’ve received your emergency alert and our team is reviewing it.</p>
+    <ul>
+    <li><strong>Message:</strong> {{ alert.message }}</li>
+    <li><strong>Location:</strong> {{ alert.latitude }}, {{ alert.longitude }}</li>
+    <li><strong>Time:</strong> {{ alert.triggered_at }}</li>
+    </ul>
+    <p style="color:#3498db;">Stay safe. We’ll reach out if needed.</p>
+
+  </div>
+</body>
+</html>

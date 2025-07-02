@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'schema_viewer',
     'kyc',
     'drf_spectacular',
+    'emergency',
+    'channels',
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -78,7 +80,7 @@ ROOT_URLCONF = 'nomadlink_backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -89,6 +91,15 @@ TEMPLATES = [
         },
     },
 ]
+
+ASGI_APPLICATION = 'nomadlink_backend.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
+
 
 WSGI_APPLICATION = 'nomadlink_backend.wsgi.application'
 
@@ -227,3 +238,35 @@ CORS_ALLOW_CREDENTIALS = True
 # For development only
 CORS_ALLOW_ALL_ORIGINS = DJANGO_ENV != 'production'
 
+
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+ADMIN_EMAIL = os.getenv('ADMIN_EMAIL')
+
+
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+}
+
+
+# Minting
+MINT_RPC_URL = os.getenv("MINT_RPC_URL")
+MINT_CONTRACT_ADDRESS = os.getenv("MINT_CONTRACT_ADDRESS")
+MINT_PRIVATE_KEY = os.getenv("MINT_WALLET_PRIVATE_KEY")
+MINT_ABI_PATH = BASE_DIR / "contracts/soulstamp_abi.json"

@@ -7,14 +7,19 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
     SpectacularRedocView
 )
+from emergency.views import emergency_dashboard
 
 urlpatterns = [
+    path('admin/emergency-dashboard/', emergency_dashboard, name='emergency-dashboard'),
     path('admin/', admin.site.urls),
 
     # App APIs
     path('api/auth/', include('accounts.urls')),
     path('api/bookings/', include('bookings.urls')),
     path('api/kyc/', include('kyc.urls')),
+    path('api/emergency/', include('emergency.urls')),
+
+
 
     # DRF Spectacular - OpenAPI schema and docs
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
