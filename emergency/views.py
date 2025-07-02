@@ -96,6 +96,7 @@ def emergency_dashboard(request):
 
 
 @extend_schema(
+    request=None,
     responses=EmergencyAlertSerializer,
     tags=["Emergency"],
     description="Mark an emergency alert as resolved (Admin only)."
