@@ -18,8 +18,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '   http://localhost:3000',
-    '  https://xceltrip.vercel.app',
-    'https://xceltrip-two.vercel.app/',
+    'https://xceltrip-two.vercel.app/for',
 ]
 
 
