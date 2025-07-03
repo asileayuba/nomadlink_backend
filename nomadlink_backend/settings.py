@@ -174,7 +174,13 @@ SIMPLE_JWT = {
 
 # CORS
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = []
+CORS_ALLOWED_ORIGINS = [
+    'xceltrip-backend.onrender.com',
+    'localhost',
+    '127.0.0.1',
+    'http://localhost:3000',
+    'https://xceltrip-two.vercel.app/for',
+    ]
 CORS_ALLOW_ALL_ORIGINS = DJANGO_ENV != 'production'
 
 # EMAIL SETTINGS
