@@ -17,7 +17,7 @@ ALLOWED_HOSTS = [
     'xceltrip-backend.onrender.com',
     'localhost',
     '127.0.0.1',
-    '   http://localhost:3000',
+    'http://localhost:3000',
     'https://xceltrip-two.vercel.app/for',
 ]
 
