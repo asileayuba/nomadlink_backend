@@ -183,6 +183,14 @@ CORS_ALLOWED_ORIGINS = [
     ]
 CORS_ALLOW_ALL_ORIGINS = DJANGO_ENV != 'production'
 
+# Cross-Site Request Forgery (CSRF)
+CSRF_TRUSTED_ORIGINS = [
+    'https://xceltrip-backend.onrender.com',
+    'http://localhost:3000',
+    'https://xceltrip-two.vercel.app',
+]
+
+
 # EMAIL SETTINGS
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
