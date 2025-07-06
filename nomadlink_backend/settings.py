@@ -22,6 +22,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'http://localhost:3000',
     'https://xceltrip-two.vercel.app',
+    'https://xceltrip.eth.limo/',
 ]
 
 
@@ -190,6 +191,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://xceltrip-backend.onrender.com",
     "https://xceltrip-two.vercel.app",
+'https://xceltrip.eth.limo/',
 ]
 
 CORS_ALLOW_ALL_ORIGINS = DJANGO_ENV != 'production'
@@ -199,6 +201,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://xceltrip-backend.onrender.com',
     'http://localhost:3000',
     'https://xceltrip-two.vercel.app',
+    'https://xceltrip.eth.limo/',
 ]
 
 
