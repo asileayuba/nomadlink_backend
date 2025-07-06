@@ -4,19 +4,24 @@ from django.core.exceptions import ValidationError
 from cloudinary.models import CloudinaryField
 import os
 
-# PDF validator
+# PDF validator for Cloudinary
 def validate_file_pdf_only(file):
-    ext = os.path.splitext(file.name)[1].lower()
+    try:
+        ext = os.path.splitext(str(file))[1].lower()
+    except Exception:
+        raise ValidationError("Invalid file. Could not determine extension.")
+
     if ext != '.pdf':
         raise ValidationError("Only PDF files are allowed.")
 
-    if file.size > 4 * 1024 * 1024:  # 4MB
-        raise ValidationError("File size must be under 4MB.")
+    # File size validation is skipped because CloudinaryField doesn't expose `.size` directly.
+    # Recommend validating file size on frontend or via Cloudinary API.
 
-# Image validator
+# Image validator for Cloudinary
 def validate_image_size(file):
-    if file.size > 4 * 1024 * 1024:  # 4MB
-        raise ValidationError("Image file size must be under 4MB.")
+    # File size not accessible reliably from CloudinaryField.
+    # Add check via Cloudinary upload presets or frontend.
+    pass  # Placeholder if needed later
 
 class KYC(models.Model):
     LEVEL_CHOICES = (
@@ -40,34 +45,20 @@ class KYC(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='kyc')
     full_name = models.CharField(max_length=255, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
-    
+
+    id_type = models.CharField(max_length=50, choices=ID_TYPE_CHOICES, default='passport')
+
     id_document = CloudinaryField(
-        resource_type='raw',  # for PDF or other files
+        resource_type='raw',
         blank=True,
         null=True,
         validators=[validate_file_pdf_only]
     )
+    id_document_file_type = models.CharField(max_length=50, blank=True, null=True)
+    id_document_file_size = models.PositiveIntegerField(blank=True, null=True)
 
     selfie_photo = CloudinaryField(
-        'image',
-        blank=True,
-        null=True,
-        validators=[validate_image_size]
-    )
-
-
-    # id_type = models.CharField(max_length=50, choices=ID_TYPE_CHOICES, default='passport')
-    # id_document = models.FileField(
-    #     upload_to='kyc/documents/',
-    #     blank=True,
-    #     null=True,
-    #     validators=[validate_file_pdf_only]
-    # )
-    # id_document_file_type = models.CharField(max_length=50, blank=True, null=True)
-    # id_document_file_size = models.PositiveIntegerField(blank=True, null=True)
-
-    selfie_photo = models.ImageField(
-        upload_to='kyc/selfies/',
+        resource_type='image',
         blank=True,
         null=True,
         validators=[validate_image_size]
@@ -82,14 +73,12 @@ class KYC(models.Model):
     reviewed_at = models.DateTimeField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        # Track file metadata
+        # Assign file metadata if available (best-effort with CloudinaryField)
         if self.id_document:
-            self.id_document_file_type = os.path.splitext(self.id_document.name)[1].lower()
-            self.id_document_file_size = self.id_document.size
+            self.id_document_file_type = os.path.splitext(str(self.id_document))[1].lower()
 
         if self.selfie_photo:
-            self.selfie_file_type = os.path.splitext(self.selfie_photo.name)[1].lower()
-            self.selfie_file_size = self.selfie_photo.size
+            self.selfie_file_type = os.path.splitext(str(self.selfie_photo))[1].lower()
 
         # Auto-promote to Level 2 if both files are present
         if self.id_document and self.selfie_photo:
