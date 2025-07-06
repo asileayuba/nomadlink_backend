@@ -3,6 +3,9 @@ from dotenv import load_dotenv
 import os
 from pathlib import Path
 from datetime import timedelta
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 load_dotenv()
 
@@ -18,7 +21,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'http://localhost:3000',
-    'https://xceltrip-two.vercel.app/for',
+    'https://xceltrip-two.vercel.app',
 ]
 
 
@@ -128,6 +131,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # DEFAULT PRIMARY KEY
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Cloudinary
+cloudinary.config(
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET'),
+    secure=True
+)
+
 # REST FRAMEWORK
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
@@ -175,12 +186,12 @@ SIMPLE_JWT = {
 # CORS
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    'xceltrip-backend.onrender.com',
-    'localhost',
-    '127.0.0.1',
-    'http://localhost:3000',
-    'https://xceltrip-two.vercel.app/for',
-    ]
+    "http://127.0.0.1:8000",
+    "http://localhost:3000",
+    "https://xceltrip-backend.onrender.com",
+    "https://xceltrip-two.vercel.app",
+]
+
 CORS_ALLOW_ALL_ORIGINS = DJANGO_ENV != 'production'
 
 # Cross-Site Request Forgery (CSRF)

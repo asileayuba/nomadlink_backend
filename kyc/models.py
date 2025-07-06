@@ -1,6 +1,7 @@
 from django.db import models
 from accounts.models import CustomUser
 from django.core.exceptions import ValidationError
+from cloudinary.models import CloudinaryField
 import os
 
 # PDF validator
@@ -39,16 +40,31 @@ class KYC(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='kyc')
     full_name = models.CharField(max_length=255, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
-
-    id_type = models.CharField(max_length=50, choices=ID_TYPE_CHOICES, default='passport')
-    id_document = models.FileField(
-        upload_to='kyc/documents/',
+    
+    id_document = CloudinaryField(
+        resource_type='raw',  # for PDF or other files
         blank=True,
         null=True,
         validators=[validate_file_pdf_only]
     )
-    id_document_file_type = models.CharField(max_length=50, blank=True, null=True)
-    id_document_file_size = models.PositiveIntegerField(blank=True, null=True)
+
+    selfie_photo = CloudinaryField(
+        'image',
+        blank=True,
+        null=True,
+        validators=[validate_image_size]
+    )
+
+
+    # id_type = models.CharField(max_length=50, choices=ID_TYPE_CHOICES, default='passport')
+    # id_document = models.FileField(
+    #     upload_to='kyc/documents/',
+    #     blank=True,
+    #     null=True,
+    #     validators=[validate_file_pdf_only]
+    # )
+    # id_document_file_type = models.CharField(max_length=50, blank=True, null=True)
+    # id_document_file_size = models.PositiveIntegerField(blank=True, null=True)
 
     selfie_photo = models.ImageField(
         upload_to='kyc/selfies/',
