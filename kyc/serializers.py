@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import KYC
+from drf_spectacular.utils import extend_schema_field
 
 class KYCSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
@@ -13,6 +14,7 @@ class KYCSerializer(serializers.ModelSerializer):
         ]
 
     # Return username for better API readability
+    @extend_schema_field(str)
     def get_user(self, obj):
         return obj.user.username if hasattr(obj.user, 'username') else str(obj.user)
 
